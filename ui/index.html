@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Triage OpenEnv UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/ui-assets/styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <main class="layout">
+    <header class="hero">
+      <p class="eyebrow">Tier-2 Support Benchmark</p>
+      <h1>Email Triage OpenEnv Playground</h1>
+      <p class="subtitle">We solve customer-support workflow automation: classify incoming emails, apply policy correctly, and resolve issues with tool-based actions.</p>
+    </header>
+
+    <section class="panel">
+      <h2>Problem We Are Solving</h2>
+      <p class="problem-copy">
+        Support teams receive large volumes of mixed-intent emails. This environment trains and evaluates agents to
+        triage emails, follow return-policy rules, and execute multi-step resolutions with reliable reward signals.
+      </p>
+      <div class="grid pros-cons-grid">
+        <article class="panel mini-panel">
+          <h3>Pros</h3>
+          <ul class="fact-list">
+            <li>Chained task pipeline: task_1 output → task_2 input → task_3 input.</li>
+            <li>Deterministic graders with partial-credit rewards (no randomness).</li>
+            <li>HF Space ML assistance with automatic fallback (always completes).</li>
+            <li>Transparent epoch logs, agent policy logs, and per-step traces.</li>
+            <li>Dataset-backed case generation (real support corpus patterns).</li>
+            <li>Full end-to-end pipeline runs with accurate handoff payloads.</li>
+          </ul>
+        </article>
+        <article class="panel mini-panel">
+          <h3>Cons</h3>
+          <ul class="fact-list">
+            <li>Task domain is specific to customer support (not general NLP).</li>
+            <li>HF Space latency affects assisted mode response time.</li>
+            <li>Policy rules are simplified (real support has more edge cases).</li>
+            <li>Synthetic datasets: local corpus patterns may differ from production.</li>
+            <li>Task sizes are small (4 emails, 2-3 steps per task).</li>
+            <li>Inventory/order DB are mocked (not real system integration).</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Flow Diagram</h2>
+      <figure class="diagram-figure">
+        <img class="diagram-image" src="/ui-assets/diagrams/flow_diagram.svg" alt="Flow diagram for email triage environment" />
+        <figcaption class="diagram-caption">Generated with Python matplotlib for a clean, presentation-ready process view.</figcaption>
+      </figure>
+    </section>
+
+    <section class="panel">
+      <h2>Feature Architecture Diagram</h2>
+      <figure class="diagram-figure">
+        <img class="diagram-image" src="/ui-assets/diagrams/feature_architecture.svg" alt="Feature architecture diagram for email triage environment" />
+        <figcaption class="diagram-caption">Layered view of UI, API, environment tasks, and model/data components.</figcaption>
+      </figure>
+    </section>
+
+    <section class="panel">
+      <h2>Training Lifecycle Diagram</h2>
+      <figure class="diagram-figure">
+        <img class="diagram-image" src="/ui-assets/diagrams/training_lifecycle.svg" alt="Training lifecycle diagram for epoch-based learning" />
+        <figcaption class="diagram-caption">Epoch execution, reward collection, policy updates, logging, and retraining loop.</figcaption>
+      </figure>
+    </section>
+
+    <section class="panel controls">
+      <div class="control-row">
+        <label for="taskSelect">Task</label>
+        <select id="taskSelect">
+          <option value="task_1">task_1 - Email classification</option>
+          <option value="task_2">task_2 - Policy response</option>
+          <option value="task_3">task_3 - Multi-system resolution</option>
+        </select>
+      </div>
+      <div class="control-row inline-row">
+        <input id="useApiCheckbox" type="checkbox" />
+        <label for="useApiCheckbox" class="inline-label">Enable Hugging Face Space + ML assistance for auto-step</label>
+      </div>
+      <div class="button-row">
+        <button id="resetBtn" class="btn btn-primary">Reset</button>
+        <button id="autoBtn" class="btn">Auto Next</button>
+        <button id="runEpisodeBtn" class="btn">Run Episode</button>
+        <button id="runPipelineBtn" class="btn btn-accent">Run Full Pipeline</button>
+      </div>
+      <p id="statusText" class="status">Ready.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Support Search</h2>
+      <div id="supportStats" class="support-stats"></div>
+      <div class="agent-status-shell">
+        <div class="agent-status-head">
+          <h3>Self-Learning Module</h3>
+          <span id="agentStatusMeta" class="agent-status-meta">Idle</span>
+        </div>
+        <div id="agentStatus" class="agent-status"></div>
+        <div class="button-row agent-actions">
+          <a class="btn btn-ghost" href="/ui/logs">Open Log Page</a>
+        </div>
+      </div>
+      <div class="agent-status-shell">
+        <div class="agent-status-head">
+          <h3>Epoch Trainer (All Rounds)</h3>
+          <span id="trainingMeta" class="agent-status-meta">No epochs yet</span>
+        </div>
+        <div id="trainingSummary" class="agent-status"></div>
+        <div class="training-controls">
+          <div class="control-row">
+            <label for="epochCountInput">Epochs To Train</label>
+            <input id="epochCountInput" type="number" min="1" max="200" value="5" />
+          </div>
+          <div class="button-row agent-actions">
+            <button id="trainEpochBtn" class="btn btn-primary">Train Again</button>
+          </div>
+        </div>
+        <div id="epochLogList" class="epoch-log-list"></div>
+      </div>
+      <div class="search-grid">
+        <div class="control-row search-input-row">
+          <label for="supportSearchInput">Search Query</label>
+          <input id="supportSearchInput" type="text" placeholder="Meta login privacy account issue" />
+        </div>
+        <div class="control-row search-input-row">
+          <label for="supportSearchTopK">Top Results</label>
+          <input id="supportSearchTopK" type="number" min="1" max="10" value="3" />
+        </div>
+      </div>
+      <div class="button-row">
+        <button id="supportSearchBtn" class="btn btn-primary">Search Corpus</button>
+        <button id="supportSearchClearBtn" class="btn">Clear</button>
+      </div>
+      <div id="supportSearchResults" class="search-results"></div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Action Builder</h2>
+        <div class="control-row">
+          <label for="actionType">Action Type</label>
+          <select id="actionType"></select>
+        </div>
+        <div id="actionFields" class="fields"></div>
+        <button id="submitActionBtn" class="btn btn-accent">Submit Action</button>
+      </article>
+
+      <article class="panel">
+        <h2>Live Metrics</h2>
+        <div id="metrics" class="metrics"></div>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Current Observation</h2>
+        <pre id="observationView" class="mono-box"></pre>
+      </article>
+
+      <article class="panel">
+        <h2>Step Timeline</h2>
+        <div id="timeline" class="timeline"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Final Task Response</h2>
+      <pre id="outcomeView" class="mono-box outcome-box"></pre>
+    </section>
+  </main>
+
+  <script src="/ui-assets/app.js" defer></script>
+</body>
+</html>
