@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$RepoId,
-    [string]$RepoRoot = "c:\Users\prath\OneDrive\Desktop\openenv\openenv\email-triage-env",
+    [string]$RepoRoot = "c:\Users\shiwangi\Downloads\meta_hackathon-master\meta_hackathon-master",
     [string]$Branch = "main"
 )
 
