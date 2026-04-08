@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "email-triage-openenv"
+version = "1.0.0"
+description = "Tier-2 support OpenEnv environment for email triage and resolution"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi==0.111.0",
+  "uvicorn==0.30.0",
+  "pydantic==2.7.0",
+  "faker==25.0.0",
+  "httpx==0.25.0",
+  "python-dotenv==1.0.1",
+  "requests==2.32.0",
+  "openai==1.75.0",
+  "openenv",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["api*", "env*", "scripts*"]
