@@ -1,6 +1,11 @@
+param(
+  [string]$BindHost = '127.0.0.1',
+  [int]$Port = 8000
+)
+
 $ErrorActionPreference = 'Stop'
 
-$root = 'c:\Users\shiwangi\Downloads\meta_hackathon-master\meta_hackathon-master'
+$root = Split-Path -Parent $PSCommandPath
 $ui = Join-Path $root 'ui'
 $trainingPath = Join-Path $root 'datasets\epoch_training_log.jsonl'
 $agentLogPath = Join-Path $root 'datasets\task1_agent_log.jsonl'
@@ -92,9 +97,9 @@ $agentLogState = Load-Jsonl -Path $agentLogPath
 $nextEpoch = if ($trainingState.Count -gt 0) { [int]$trainingState[-1].epoch + 1 } else { 1 }
 
 $listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add('http://127.0.0.1:8001/')
+$listener.Prefixes.Add("http://${BindHost}:$Port/")
 $listener.Start()
-Write-Host '[OK] Server running: http://127.0.0.1:8001/' -ForegroundColor Green
+Write-Host ("[OK] Server running: http://${BindHost}:$Port/") -ForegroundColor Green
 
 while ($listener.IsListening) {
   $context = $listener.GetContext()
