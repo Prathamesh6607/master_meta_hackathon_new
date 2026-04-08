@@ -71,12 +71,10 @@ reward:
     - "replacement shipped for non-existent order"
 
 endpoints:
-  reset: POST /reset
-  reset_task: POST /reset/{task_id}
+  reset: POST /reset/{task_id}
   step:  POST /step/{task_id}
   state: GET  /state/{task_id}
   auto_step: POST /auto-step/{task_id}
   pipeline_run: POST /pipeline/run
-  pipeline_aliases: POST /pipeline, POST /pipeline/run/
   training_run: POST /training/run
   training_logs: GET /training/logs
