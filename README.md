@@ -98,14 +98,32 @@ Observations include:
 
 Python runtime target: **3.10.1**
 
+### Fastest Judge Path (Recommended)
+
+Use Docker to avoid local Python/env mismatches:
+
 ```bash
-pip install -r requirements.txt
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+docker build -t email-triage-env .
+docker run --rm -p 8000:8000 email-triage-env
+```
+
+Then verify:
+
+```bash
+curl -X GET http://localhost:8000/health
+curl -X POST http://localhost:8000/reset/task_1
+```
+
+### Native Local Run (Optional)
+
+```bash
+python -m pip install -r requirements.txt
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Then test the API:
 ```bash
-curl -X POST http://localhost:8000/reset
+curl -X POST http://localhost:8000/reset/task_1
 ```
 
 ## Baseline Inference Script
@@ -572,23 +590,33 @@ email-triage-env/
 
 ```bash
 # Clone and navigate to the repository
-cd email-triage-env
+git clone https://github.com/Prathamesh6607/master_meta_hackathon_new.git
+cd master_meta_hackathon_new
 
 # Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .\.venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 # Start the API
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+Windows PowerShell equivalent:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Visit:
 - **API Health**: http://localhost:8000/health
 - **UI Demo**: http://localhost:8000/ui
-- **API Reset Endpoint**: `curl -X POST http://localhost:8000/reset`
+- **API Reset Endpoint**: `curl -X POST http://localhost:8000/reset/task_1`
 
 ### Run Baseline Inference
 
@@ -596,6 +624,15 @@ Visit:
 export API_BASE_URL="https://api.openai.com/v1"
 export MODEL_NAME="gpt-4.1-mini"
 export HF_TOKEN="your-hf-token"
+python inference.py
+```
+
+Windows PowerShell:
+
+```powershell
+$env:API_BASE_URL = "https://api.openai.com/v1"
+$env:MODEL_NAME = "gpt-4.1-mini"
+$env:HF_TOKEN = "your-hf-token"
 python inference.py
 ```
 
