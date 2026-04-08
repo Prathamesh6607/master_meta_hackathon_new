@@ -48,10 +48,26 @@ CATEGORY_OPTIONS = [
 ]
 
 PRIORITY_OPTIONS = ['Low', 'Normal', 'Urgent']
-HF_EMAIL_CLASSIFIER_SPACE_URL = os.environ.get(
-    'HF_EMAIL_CLASSIFIER_SPACE_URL',
-    'https://gayathrisoorya-email-classification-new.hf.space',
-).rstrip('/')
+
+
+def _normalize_hf_space_url(url: str) -> str:
+    raw = (url or '').strip().rstrip('/')
+    if not raw:
+        return 'https://gayathrisoorya-email-classification-new.hf.space'
+
+    # Allow users to provide either the Space page URL or the hf.space app URL.
+    match = re.match(r'^https?://huggingface\.co/spaces/([^/]+)/([^/]+)$', raw, re.IGNORECASE)
+    if match:
+        owner = match.group(1)
+        space = match.group(2)
+        return f'https://{owner}-{space}.hf.space'
+
+    return raw
+
+
+HF_EMAIL_CLASSIFIER_SPACE_URL = _normalize_hf_space_url(
+    os.environ.get('HF_EMAIL_CLASSIFIER_SPACE_URL', 'https://gayathrisoorya/email_classification_new')
+)
 
 
 class AutoStepRequest(BaseModel):
