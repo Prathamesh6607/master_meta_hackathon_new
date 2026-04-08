@@ -398,7 +398,7 @@ curl -X POST http://localhost:8000/pipeline/run \
     "task2_to_task3": {...synthesized task_3 case...}
   },
   "results": {
-    "task_1": {"score": 1.0, "steps": 4, "done": true, "trace": [...]},
+      "task_1": {"score": 1.0, "steps": 4, "done": true, "trace": [...]},
     "task_2": {"score": 1.0, "steps": 2, "done": true, "trace": [...]},
     "task_3": {"score": 1.0, "steps": 3, "done": true, "trace": [...]}
   }

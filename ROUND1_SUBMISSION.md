@@ -80,6 +80,7 @@ python inference.py
 ```
 
 Core endpoints:
+- `POST /reset`
 - `POST /reset/{task_id}`
 - `POST /step/{task_id}`
 - `GET /state/{task_id}`

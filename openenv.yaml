@@ -71,7 +71,8 @@ reward:
     - "replacement shipped for non-existent order"
 
 endpoints:
-  reset: POST /reset/{task_id}
+  reset: POST /reset
+  reset_task: POST /reset/{task_id}
   step:  POST /step/{task_id}
   state: GET  /state/{task_id}
   auto_step: POST /auto-step/{task_id}
