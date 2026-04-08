@@ -1,3 +1,13 @@
+---
+title: Email Triage OpenEnv
+emoji: "📨"
+colorFrom: blue
+colorTo: cyan
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # Email Triage OpenEnv
 
 **A Tier-2 Support Benchmark for Real-World AI Agent Workflows**
