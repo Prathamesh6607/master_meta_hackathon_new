@@ -24,4 +24,7 @@ dependencies = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["api*", "env*", "scripts*"]
+include = ["api*", "env*", "scripts*", "server*"]
+
+[project.scripts]
+server = "server.app:main"
