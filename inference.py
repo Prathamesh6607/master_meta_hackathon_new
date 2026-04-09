@@ -291,8 +291,7 @@ def coerce_allowed_action(action: dict, available_actions: list, fallback_action
     return fallback_action
 
 
-def run_task(task_id: str) -> float:
-    format_bool(value: bool) -> str:
+def format_bool(value: bool) -> str:
     return 'true' if bool(value) else 'false'
 
 
