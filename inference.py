@@ -14,9 +14,6 @@ API_BASE_URL = os.environ.get('API_BASE_URL', 'https://api.openai.com/v1').strip
 MODEL_NAME = os.environ.get('MODEL_NAME', 'gpt-4.1-mini').strip()
 HF_TOKEN = os.environ.get('HF_TOKEN', '').strip()
 
-if not HF_TOKEN:
-    raise ValueError('HF_TOKEN environment variable is required')
-
 # LLM usage is optional for the baseline; deterministic policy stays default.
 USE_LLM_TASK1 = os.environ.get('USE_LLM_TASK1', '0') == '1'
 TASK1_AGENT = Task1ReinforcementAgent()
@@ -309,6 +306,14 @@ def format_action(action: dict) -> str:
         return '{}'
 
 
+def safe_json_response(response: requests.Response, default: dict) -> dict:
+    try:
+        payload = response.json()
+        return payload if isinstance(payload, dict) else default
+    except ValueError:
+        return default
+
+
 def emit_start(task_id: str) -> None:
     print(f'[START] task={task_id} env={ENV_BENCHMARK} model={MODEL_NAME}')
 
@@ -336,7 +341,8 @@ def run_task(task_id: str) -> float:
     try:
         response = requests.post(f'{ENV_URL}/reset/{task_id}', timeout=30)
         response.raise_for_status()
-        obs = response.json().get('observation', {}) or {}
+        reset_payload = safe_json_response(response, default={})
+        obs = reset_payload.get('observation', {}) or {}
 
         for step_num in range(1, MAX_STEPS + 1):
             current_email = obs.get('current_email') or {}
@@ -384,7 +390,7 @@ def run_task(task_id: str) -> float:
                 step_resp = requests.post(f'{ENV_URL}/step/{task_id}', json=sent_action, timeout=30)
                 step_resp.raise_for_status()
 
-            result = step_resp.json()
+            result = safe_json_response(step_resp, default={})
             reward_data = result.get('reward', {}) or {}
             observation = result.get('observation', {}) or {}
             reward = float(reward_data.get('value', 0.0) or 0.0)
@@ -415,15 +421,17 @@ def main():
         health = requests.get(f'{ENV_URL}/', timeout=5)
         health.raise_for_status()
     except requests.RequestException as exc:
-        raise RuntimeError(
+        print(
             f'Cannot reach environment at {ENV_URL}. '
             'Start the API first with: '
             '`python -m uvicorn api.main:app --host 127.0.0.1 --port 8000` '
             'and ensure ENV_URL matches.'
-        ) from exc
+        )
+        print(f'Details: {exc}')
+        return
 
     for task in TASKS:
-        run_task(task
+        run_task(task)
 
 if __name__ == '__main__':
     main()
