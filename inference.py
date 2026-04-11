@@ -13,6 +13,7 @@ load_dotenv()  # reads from .env file
 API_BASE_URL = os.environ.get('API_BASE_URL', 'https://api.openai.com/v1').strip()
 MODEL_NAME = os.environ.get('MODEL_NAME', 'gpt-4.1-mini').strip()
 HF_TOKEN = os.environ.get('HF_TOKEN', '').strip()
+LOCAL_IMAGE_NAME = os.environ.get('LOCAL_IMAGE_NAME', '').strip()
 
 # LLM usage is optional for the baseline; deterministic policy stays default.
 USE_LLM_TASK1 = os.environ.get('USE_LLM_TASK1', '0') == '1'
@@ -51,6 +52,13 @@ def parse_action(text: str) -> dict:
 def as_int(value, default=0):
     try:
         return int(value)
+    except Exception:
+        return default
+
+
+def as_float(value, default=0.0):
+    try:
+        return float(value)
     except Exception:
         return default
 
@@ -325,15 +333,16 @@ def emit_step(step_num: int, action: dict, reward: float, done: bool, error) -> 
     )
 
 
-def emit_end(success: bool, steps: int, rewards: list[float]) -> None:
+def emit_end(success: bool, steps: int, score: float, rewards: list[float]) -> None:
     rewards_text = ','.join(f'{float(value):.2f}' for value in rewards)
-    print(f'[END] success={format_bool(success)} steps={steps} rewards={rewards_text}')
+    print(f'[END] success={format_bool(success)} steps={steps} score={float(score):.2f} rewards={rewards_text}')
 
 
 def run_task(task_id: str) -> float:
     rewards: list[float] = []
     steps_executed = 0
     success = False
+    score = 0.0
     current_error = None
 
     emit_start(task_id)
@@ -393,7 +402,7 @@ def run_task(task_id: str) -> float:
             result = safe_json_response(step_resp, default={})
             reward_data = result.get('reward', {}) or {}
             observation = result.get('observation', {}) or {}
-            reward = float(reward_data.get('value', 0.0) or 0.0)
+            reward = as_float(reward_data.get('value', 0.0) or 0.0, default=0.0)
             done = bool(result.get('done', False))
             current_error = observation.get('last_action_error')
 
@@ -406,30 +415,19 @@ def run_task(task_id: str) -> float:
 
             emit_step(step_num=step_num, action=sent_action, reward=reward, done=done, error=current_error)
             if done:
-                success = True
                 break
     except Exception as exc:
         current_error = str(exc)
     finally:
-        emit_end(success=success, steps=steps_executed, rewards=rewards)
+        total_reward = as_float(sum(rewards), default=0.0)
+        score = max(0.0, min(1.0, total_reward))
+        success = bool(steps_executed > 0 and current_error in (None, '', 'null') and score >= 0.99)
+        emit_end(success=success, steps=steps_executed, score=score, rewards=rewards)
 
-    return float(sum(rewards))
+    return score
 
 
 def main():
-    try:
-        health = requests.get(f'{ENV_URL}/', timeout=5)
-        health.raise_for_status()
-    except requests.RequestException as exc:
-        print(
-            f'Cannot reach environment at {ENV_URL}. '
-            'Start the API first with: '
-            '`python -m uvicorn api.main:app --host 127.0.0.1 --port 8000` '
-            'and ensure ENV_URL matches.'
-        )
-        print(f'Details: {exc}')
-        return
-
     for task in TASKS:
         run_task(task)
 
