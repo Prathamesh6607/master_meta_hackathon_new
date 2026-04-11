@@ -342,9 +342,9 @@ def emit_end(success: bool, steps: int, score: float, rewards: list[float]) -> N
 
 
 def normalize_score(rewards: list[float]) -> float:
-    # Keep score in judge-required [0, 1] range even if task rewards accumulate above 1.
+    # Keep score strictly in (0, 1) as required by phase-2 validator.
     total = float(sum(rewards))
-    return max(0.0, min(1.0, total))
+    return max(0.01, min(0.99, total))
 
 
 def run_task(task_id: str) -> float:
