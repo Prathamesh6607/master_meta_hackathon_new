@@ -880,6 +880,23 @@ async function apiStep(action) {
   await loadAgentStatus();
 }
 
+function isEpisodeDoneError(message) {
+  const text = String(message || "").toLowerCase();
+  return text.includes("episode is done") || text.includes("call /reset") || text.includes("call reset");
+}
+
+async function safeApiStep(action) {
+  try {
+    await apiStep(action);
+  } catch (err) {
+    if (!isEpisodeDoneError(err?.message)) {
+      throw err;
+    }
+    await apiReset();
+    await apiStep(action);
+  }
+}
+
 function getAutoStepOptions() {
   return {
     use_api: Boolean(refs.useApiCheckbox.checked),
@@ -927,6 +944,18 @@ async function apiAutoStep() {
   await loadAgentStatus();
 }
 
+async function safeApiAutoStep() {
+  try {
+    await apiAutoStep();
+  } catch (err) {
+    if (!isEpisodeDoneError(err?.message)) {
+      throw err;
+    }
+    await apiReset();
+    await apiAutoStep();
+  }
+}
+
 async function runEpisode() {
   if (!state.observation || state.done) {
     await apiReset();
@@ -937,7 +966,7 @@ async function runEpisode() {
     if (state.done) {
       break;
     }
-    await apiAutoStep();
+    await safeApiAutoStep();
     await new Promise((resolve) => setTimeout(resolve, 240));
   }
 
@@ -1087,7 +1116,7 @@ async function submitManualAction() {
     await apiReset();
   }
   const action = collectActionFromForm();
-  await apiStep(action);
+  await safeApiStep(action);
 }
 
 refs.taskSelect.addEventListener("change", async (e) => {
@@ -1115,10 +1144,10 @@ refs.submitActionBtn.addEventListener("click", async () => {
 
 refs.autoBtn.addEventListener("click", async () => {
   try {
-    if (!state.observation) {
+    if (!state.observation || state.done) {
       await apiReset();
     }
-    await apiAutoStep();
+    await safeApiAutoStep();
   } catch (err) {
     setStatus(`Error: ${err.message}`);
   }
